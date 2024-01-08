@@ -2,6 +2,8 @@
 
 namespace Motomedialab\Stub\Concerns;
 
+use Illuminate\Console\Command;
+
 abstract class DockerService
 {
     public int $order = 0;
@@ -14,12 +16,22 @@ abstract class DockerService
 
     public ?array $requires = [];
 
+    protected ?Command $command = null;
+
+
     public function __construct(array $variables = [])
     {
         $this->variables = [
             ...$this->variables,
             ...$variables
         ];
+    }
+
+    public function setCommand(Command $command): static
+    {
+        $this->command = $command;
+
+        return $this;
     }
 
     public function getVariables(): array
@@ -57,14 +69,14 @@ abstract class DockerService
         return $contents;
     }
 
-    public function build(string $dockerComposeFile): void
+    public function build(string &$composeFile): void
     {
         if ($this->dockerStubDir) {
             $this->cloneDockerFiles();
         }
 
         if ($this->composeStub) {
-            file_put_contents($dockerComposeFile, $this->evaluate($this->composeStub) . "\n\n", FILE_APPEND);
+            $composeFile.= $this->evaluate($this->composeStub) . "\n\n";
         }
 
         // create generated files

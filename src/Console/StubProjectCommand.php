@@ -37,6 +37,8 @@ class StubProjectCommand extends Command
 
     private ?string $envFileData = null;
 
+    private ?string $composeFile = null;
+
     public function handle(): void
     {
         // set our envFile contents
@@ -52,7 +54,7 @@ class StubProjectCommand extends Command
 
         $this->configureServices($chosenServices);
 
-        $this->moveComposeFile();
+        $this->persistComposeFile();
 
         $this->buildEnvironmentFile($chosenServices);
 
@@ -119,6 +121,7 @@ class StubProjectCommand extends Command
 
         return collect($services)
             ->map(fn ($service) => (new $service())
+                ->setCommand($this)
                 ->setVariable('DOMAIN', $this->domain));
     }
 
@@ -128,13 +131,13 @@ class StubProjectCommand extends Command
     private function configureServices(Collection $services): void
     {
         // setup our docker-compose file
-        $this->setupComposeFile();
+        $this->composeFile = "version: \"3.8\"\n\nservices:\n\n";
 
         $services->each(function (DockerService $service) {
-            $this->line('Configuring ' . $service->name . '...');
+            $this->info('Configuring ' . $service->name . '...');
 
             // build our services with docker-compose.
-            $service->build($this->tmpComposeFile());
+            $service->build($this->composeFile);
 
             // setup any dependencies
             $service->setupDependencies();
@@ -181,25 +184,9 @@ class StubProjectCommand extends Command
         }
     }
 
-    private function setupComposeFile(): void
+    private function persistComposeFile(): void
     {
-        $tmpFile = $this->tmpComposeFile();
-
-        if (file_exists($tmpFile)) {
-            unlink($tmpFile);
-        }
-
-        file_put_contents($tmpFile, "version: \"3.8\"\n\nservices:\n\n");
-    }
-
-    private function moveComposeFile(): void
-    {
-        rename($this->tmpComposeFile(), base_path('docker-compose.yaml'));
-    }
-
-    private function tmpComposeFile(): string
-    {
-        return base_path('.docker-compose.yaml.tmp');
+        file_put_contents(base_path('docker-compose.yaml'), $this->composeFile);
     }
 
 }

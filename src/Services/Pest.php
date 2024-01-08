@@ -12,7 +12,7 @@ class Pest extends DockerService
 
     public string $description = 'Modern Testing Suite';
 
-    public function build(string $dockerComposeFile): void
+    public function build(string &$composeFile): void
     {
         exec('composer require pestphp/pest --dev --with-all-dependencies --no-interaction');
         exec('./vendor/bin/pest --init');

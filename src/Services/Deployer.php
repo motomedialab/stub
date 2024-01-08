@@ -12,7 +12,7 @@ class Deployer extends DockerService
 
     public string $description = 'SSH Atomic Deployment tool';
 
-    public function build(string $dockerComposeFile): void
+    public function build(string &$composeFile): void
     {
         exec('composer require --dev deployer/deployer');
         exec('vendor/bin/dep init');

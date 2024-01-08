@@ -1,7 +1,7 @@
 {
     "name": "motomedialab/stub",
     "type": "library",
-    "description": "Helper package to stub out a MotoMediaLab project",
+    "description": "Helper package to stub out a Laravel project for local development",
     "require": {
         "php": "^8.1",
         "laravel/framework": "^10.0.0"

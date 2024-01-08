@@ -38,7 +38,7 @@ TEXT
         ];
     }
 
-    public function build(string $dockerComposeFile): void
+    public function build(string &$composeFile): void
     {
         exec('composer require larastan/larastan:^2.0 --dev');
     }

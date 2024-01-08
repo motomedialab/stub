@@ -16,9 +16,14 @@ class CopyStubs
         /** @var \SplFileInfo $file */
         foreach ($iterator as $file) {
             if ($file->isFile() && pathinfo($file->getPathName(), PATHINFO_EXTENSION) === 'stub') {
-                $path = str_replace($stubPath, '', $file->getPathname());
+                $source = str_replace($stubPath, '', $file->getPathname());
+                $destination = base_path(str_replace('.stub', '', $source));
 
-                copy($file->getPathname(), base_path(str_replace('.stub', '', $path)));
+                if (!file_exists(dirname($destination))) {
+                    mkdir(dirname($destination), recursive: true);
+                }
+
+                copy($file->getPathname(), base_path(str_replace('.stub', '', $source)));
             }
         }
     }

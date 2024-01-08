@@ -48,6 +48,8 @@ class StubProjectCommand extends Command
 
         $this->setAppDomain();
 
+        $this->configureVcs();
+
         $this->publishStubs();
 
         $chosenServices = $this->chooseServices();
@@ -77,6 +79,22 @@ class StubProjectCommand extends Command
         $this->setEnvVariable('APP_URL', 'https://' . $this->domain);
 
         \Laravel\Prompts\info('Will use domain ' . $this->domain);
+    }
+
+    private function configureVcs(): void
+    {
+        if (file_exists(base_path('.git'))) {
+            return;
+        }
+
+        $value = text('Optionally enter URL to git repository', 'E.g. git@github.com:motomedialab/stub.git');
+
+        if (!$value) {
+            return;
+        }
+
+        exec('git init');
+        exec('git remote add origin' . $value);
     }
 
     private function publishStubs(): void

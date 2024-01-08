@@ -18,7 +18,7 @@ host('production')
     ->set('hostname', '{{HOSTNAME}}')
     ->set('branch', 'main')
     ->set('remote_user', '{{http_user}}')
-    ->set('deploy_path', '/home/mjml/htdocs/mjml.mcsvr.net/production');
+    ->set('deploy_path', '/home/{{HTTP_USER}}/htdocs/{{DOMAIN}}/production');
 
 // Shared files/dirs between deploys
 set('shared_files', ['.env']);

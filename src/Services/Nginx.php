@@ -2,6 +2,7 @@
 
 namespace Motomedialab\Stub\Services;
 
+use Illuminate\Support\Str;
 use Motomedialab\Stub\Concerns\DockerService;
 
 class Nginx extends DockerService
@@ -76,7 +77,6 @@ server {
 }
 CONF;
 
-
     public function build(string &$composeFile): void
     {
         parent::build($composeFile);
@@ -88,15 +88,18 @@ CONF;
     protected function configureNginxConfig(): void
     {
         // loop through our services
-        foreach($this->command->chosenServices as $service) {
-            $find = '{{' . class_basename($service) . '}}';
-            $this->baseNginxConfig = $service->nginxConfig
-                ? str_replace($find, $service->nginxConfig, $this->baseNginxConfig)
-                : str_replace($find, '', $this->baseNginxConfig);
-        }
+        $this->command->chosenServices
+            ->filter(fn (DockerService $service) => $service->nginxConfig)
+            ->each(fn (DockerService $service) => $this->baseNginxConfig = Str::replace(
+                '{{' . class_basename($service) . '}}',
+                $service->nginxConfig,
+                $this->baseNginxConfig
+            ));
 
-        // persist our updated file
-        file_put_contents(base_path('docker/nginx/nginx.conf'), $this->baseNginxConfig);
+        // replace any remaining occurrences
+        file_put_contents(
+            base_path('docker/nginx/nginx.conf'),
+            Str::replaceMatches('/{{([a-zA-Z0-9]+)}}/i', '', $this->baseNginxConfig)
+        );
     }
-
 }

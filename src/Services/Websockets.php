@@ -36,6 +36,22 @@ class Websockets extends DockerService
           - "9601:9601"
 YAML;
 
+    public ?string $nginxConfig = <<<TEXT
+location /ws {
+        proxy_pass             http://soketi:6001;
+        proxy_read_timeout     60;
+        proxy_connect_timeout  60;
+        proxy_redirect         off;
+
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host \$host;
+        proxy_cache_bypass \$http_upgrade;
+    }
+TEXT;
+
+
     public ?string $config = <<<TEXT
 # Pusher setup
 PUSHER_APP_ID={{APP_ID}}

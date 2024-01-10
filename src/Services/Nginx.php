@@ -34,4 +34,69 @@ class Nginx extends DockerService
             - "80:80"
             - "443:443"
 YAML;
+
+    private string $baseNginxConfig = <<<CONF
+server {
+    # listen on port 80 & 443
+    listen 80 default_server;
+    listen 443 ssl http2 default_server;
+
+    # increase our max body size
+    client_max_body_size 5M;
+
+    # define the path to our certificates
+    ssl_certificate /certs/dev.pem;
+    ssl_certificate_key /certs/dev.key;
+    ssl_session_timeout 5m;
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv3:+EXP;
+    ssl_prefer_server_ciphers on;
+
+    # force rewrite to SSL
+    if (\$scheme = http) {
+        return 302 https://\$host\$request_uri;
+    }
+
+    index index.php index.html;
+    server_name localhost;
+    error_log  /var/log/nginx/error.log;
+    access_log /var/log/nginx/access.log;
+
+    root /var/www/public;
+
+    location / {
+        try_files \$uri \$uri/ /index.php?\$query_string;
+    }
+
+    {{LocalStackS3}}
+    
+    {{Websockets}}
+    
+    {{PhpFpm}}
+}
+CONF;
+
+
+    public function build(string &$composeFile): void
+    {
+        parent::build($composeFile);
+
+        $this->configureNginxConfig();
+    }
+
+
+    protected function configureNginxConfig(): void
+    {
+        // loop through our services
+        foreach($this->command->chosenServices as $service) {
+            $find = '{{' . class_basename($service) . '}}';
+            $this->baseNginxConfig = $service->nginxConfig
+                ? str_replace($find, $service->nginxConfig, $this->baseNginxConfig)
+                : str_replace($find, '', $this->baseNginxConfig);
+        }
+
+        // persist our updated file
+        file_put_contents(base_path('docker/nginx/nginx.conf'), $this->baseNginxConfig);
+    }
+
 }

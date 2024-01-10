@@ -10,6 +10,21 @@ class LocalStackS3 extends DockerService
     public string $name = 'Amazon S3 Clone';
     public string $description = 'Amazon S3 style filesystem';
 
+    public ?string $nginxConfig = <<<TEXT
+location /s3bucket {
+        proxy_pass             http://localstack-s3:4566;
+        proxy_read_timeout     60;
+        proxy_connect_timeout  60;
+        proxy_redirect         off;
+
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host \$host;
+        proxy_cache_bypass \$http_upgrade;
+    }
+TEXT;
+
     public ?string $composeStub = <<<YAML
     # {{DESCRIPTION}}
     # binds to port 4566 of your local machine

@@ -33,6 +33,10 @@ class StubProjectCommand extends Command
         Pest::class,
     ];
 
+    /**
+     * @var ?Collection<DockerService>
+     */
+    public ?Collection $chosenServices = null;
 
     private ?string $domain = null;
 
@@ -147,7 +151,7 @@ class StubProjectCommand extends Command
             required: true
         );
 
-        return collect($services)
+        return $this->chosenServices = collect($services)
             ->map(fn ($service) => (new $service())
                 ->setCommand($this)
                 ->setVariable('DOMAIN', $this->domain));

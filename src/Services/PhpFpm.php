@@ -12,6 +12,18 @@ class PhpFpm extends DockerService
 
     public ?string $dockerStubDir = 'php-fpm';
 
+    public ?string $nginxConfig = <<<TEXT
+location ~ \.php$ {
+        try_files \$uri =404;
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        fastcgi_pass php-fpm:9000;
+        fastcgi_index index.php;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        fastcgi_param PATH_INFO \$fastcgi_path_info;
+    }
+TEXT;
+
     public ?string $composeStub = <<<YAML
     # {{DESCRIPTION}}
     php-fpm:

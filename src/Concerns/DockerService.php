@@ -2,7 +2,7 @@
 
 namespace Motomedialab\Stub\Concerns;
 
-use Illuminate\Console\Command;
+use Motomedialab\Stub\Console\StubProjectCommand as Command;
 
 abstract class DockerService
 {
@@ -14,9 +14,11 @@ abstract class DockerService
     public ?string $dockerStubDir = null;
     public ?string $config = null;
 
+    public ?string $nginxConfig = null;
+
     public ?array $requires = [];
 
-    protected ?Command $command = null;
+    protected Command $command;
 
 
     public function __construct(array $variables = [])

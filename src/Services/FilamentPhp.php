@@ -15,7 +15,9 @@ class FilamentPhp extends DockerService
     public function build(string &$composeFile): void
     {
         exec('composer require filament/filament:"^3.1" -W');
-        exec('php artisan filament:install --panels');
+
+        \Laravel\Prompts\info('Filament has been installed, you can begin configuring ' .
+            'your project by running `php artisan filament:install --panels`');
     }
 
 }

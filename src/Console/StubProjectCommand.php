@@ -7,6 +7,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
+use Motomedialab\Stub\Actions\ConfigureExploitPreventionMiddleware;
 use Motomedialab\Stub\Actions\CopyStubs;
 use Motomedialab\Stub\Concerns\DockerService;
 use Motomedialab\Stub\Services\Mailpit;
@@ -51,6 +52,8 @@ class StubProjectCommand extends Command
         $this->configureVcs();
 
         $this->publishStubs();
+
+        $this->configureStubs();
 
         $chosenServices = $this->chooseServices();
 
@@ -102,6 +105,13 @@ class StubProjectCommand extends Command
         $this->info('Publishing stub files');
 
         App::call(CopyStubs::class);
+    }
+
+    private function configureStubs(): void
+    {
+        $this->info('Configuring Stubs');
+
+        App::call(ConfigureExploitPreventionMiddleware::class);
     }
 
 
@@ -187,8 +197,8 @@ class StubProjectCommand extends Command
 
         $replacement = array_map(
             fn ($line) => str_starts_with($line, $variable)
-            ? sprintf('%s="%s"', $variable, $value)
-            : $line,
+                ? sprintf('%s="%s"', $variable, $value)
+                : $line,
             $lines
         );
 
